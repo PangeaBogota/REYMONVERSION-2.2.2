@@ -339,7 +339,11 @@ app_angular.controller('sessionController',['bootbox','Conexion','$scope','$loca
                 $scope.procesoEnvio=false;
                 CRUD.Updatedynamic("update t_pedidos set sincronizado='true' where sincronizado='plano'");
                 Mensajes('Pedidos Sincronizados','success','');
-                return
+                var URLactual = window.location;
+                if (URLactual.hash.includes('ingresados')) {
+                    window.location.reload();
+                }
+                return;
             }
             for (var i =0;i<elem.length;i++) {
                 var rowid=elem[i].rowid
@@ -545,12 +549,39 @@ app_angular.controller('sessionController',['bootbox','Conexion','$scope','$loca
             })
         }) 
     }
+    $scope.EnvioActividades=function(){
+        $scope.usuario=$scope.sessiondate.nombre_usuario;
+        $scope.codigoempresa=$scope.sessiondate.codigo_empresa;         
+        CRUD.selectAllinOne('select *from crm_actividades where sincronizado="false"',function(Actividad){
+            if (Actividad.length==0) {
+                $scope.MensajeEnvioVacio=1;
+            }
+            else
+            {
+                $scope.MensajeEnvioVacio=0;
+            }
+            for (var i =0;i<Actividad.length;i++) {
+                var rowidActividad=Actividad[i].rowid;
+                $http({
+                    method: 'GET',
+                    url: 'http://demos.pedidosonline.co/Mobile/SubirDatos?usuario='+$scope.usuario+'&entidad=ACTIVIDADES&codigo_empresa=' + $scope.codigoempresa + '&datos=' + JSON.stringify(Actividad[i]),
+                    async:false,
+                    }).then(
+                    function success(data) { 
+                    }, 
+                    function error(err) {
+
+                    }) 
+            }
+        });
+    }
     //CRUD.Updatedynamic("update s_planos_pedidos set estado=0 ");
     //CRUD.Updatedynamic("update t_pedidos set estado_sincronizacion=0,sincronizado='false' where rowid=10063");
     //$scope.build();
     $scope.sincronizar=function(){
         $scope.errorAlerta.bandera=0;
         ProcesadoShow();   
+        $scope.EnvioActividades();
         window.setTimeout(function(){
             if ($scope.errorAlerta.bandera==1) {
                 Mensajes('Error al Sincronizar, Por favor revise que su conexion sea estable','warning','');

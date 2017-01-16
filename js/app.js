@@ -582,6 +582,7 @@ app_angular.controller('sessionController',['bootbox','Conexion','$scope','$loca
         $scope.errorAlerta.bandera=0;
         ProcesadoShow();   
         $scope.EnvioActividades();
+        CRUD.Updatedynamic("update t_pedidos set sincronizado='EnvioCorrecto' where sincronizado='true'");
         window.setTimeout(function(){
             if ($scope.errorAlerta.bandera==1) {
                 Mensajes('Error al Sincronizar, Por favor revise que su conexion sea estable','warning','');
